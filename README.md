@@ -29,8 +29,8 @@ Parfait pour une médiathéque sur EMBY ou sur PLEX.
 
 Script basé sur ce dépot : https://github.com/trix7777/m2strm?tab=readme-ov-file
 
-Ce script est un générer entiérement par chat-gpt (N'ayant pas vraiement de compétences en code :D).
-Le dépot n'étant plus a jour je souhaite faire quelque améliorations :
+**Ce script est un générer entiérement par chat-gpt (N'ayant pas vraiement de compétences en code :D).
+Le dépot n'étant plus a jour je souhaite faire quelque améliorations :**
 
 Projet avec ce script :
 
