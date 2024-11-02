@@ -1,7 +1,10 @@
 # M3U8-STRM-GENERATOR
 
-Générateur de fichiers et dossier pour affiner votre fichier m3u en classant les fichiers dans des dossiers bien distinct pour ressembler a ceci.
-Parfait pour une médiathéque sur EMBY ou sur PLEX.
+**Générateur de fichiers et dossier pour affiner votre fichier m3u en classant les fichiers dans des dossiers bien distinct pour ressembler a ceci.
+Parfait pour une médiathéque sur EMBY ou sur PLEX.**
+
+Script basé sur ce dépot : https://github.com/trix7777/m2strm?tab=readme-ov-file
+Le dépot n'étant plus a jour je souhaite faire quelque améliorations 
 
 **Bien sur ce script à pour but de centraliser vos films et series qui vous appartiennent déjà, aucune promotion pour service divers n'est faite. A utiliser pour votre usage personnel avec les DVD que vous avez achetés ou service M3U fournie par votre opérateur Internet.**
 
@@ -27,8 +30,7 @@ Parfait pour une médiathéque sur EMBY ou sur PLEX.
 
 --------------FR - TF1.strm
 
-Script basé sur ce dépot : https://github.com/trix7777/m2strm?tab=readme-ov-file
-Le dépot n'étant plus a jour je souhaite faire quelque améliorations 
+
 
 **Ce script est un générer entiérement par CHAT-GPT (N'ayant pas vraiement de compétences en code :D).**
 
