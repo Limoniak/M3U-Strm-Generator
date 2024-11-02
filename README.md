@@ -64,7 +64,7 @@ Avant d'utiliser le script, assurez-vous d'avoir [Python 3.x](https://www.python
 
 Pour installer les dépendances requises, exécutez la commande suivante dans le répertoire contenant le script :
 
-`pip install -r requirements.txt`
+`pip install request`
 
 # Modules utiliser
 
