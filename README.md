@@ -96,9 +96,9 @@ Cette commande génére le fichier de `Config.cfg` qui sera utilise pour la suit
 
 **Etape 2 :**
 
-`python Strm-Generator.py /U`
+Une fois les informations modifié dans le fichier `Config.cfg` lancer cette commande 
 
-Une fois les informations modifié dans le fichier Config lancer cette commande 
+`python Strm-Generator.py /U`
 	
 Un fichier `unwantedgroup.cfg` sera générer. 
 Ouvrir ce fichier et supprimer les groupes de la liste si vous voulez que les groupe soit traités et leur fichiers générer
