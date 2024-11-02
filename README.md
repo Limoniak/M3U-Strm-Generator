@@ -65,18 +65,20 @@ Creer un répertoire ou seul le Script sera utiliser pour éviter les erreurs
 Etapes 1 : 
 
 Ouvrir votre terminal et lancer cette commande 
-    `python m3u8_channel_manager.py /C` Cette commande génére le fichier de config qui sera utilise pour la suite
+	`python m3u8_channel_manager.py /C` Cette commande génére le fichier de config qui sera utilise pour la suite
 
 Etape 2 : 
 
 Une fois les informations modifié dans le fichier Config lancer cette commande 
-		`python m3u8_channel_manager.py`
+	`python m3u8_channel_manager.py`
 
 Si vous avez déja un fichier m3u veuillez a bien désactivé le téléchargement dans le fichier Config.cfg
 
 Le traitement sera lancé et vos dossier créer en fonction de vos critéres.
 
-Vérification des Logs : Consultez le fichier error.txt pour toute erreur rencontrée. Les fichiers de log pour les films, séries et chaînes ajoutées seront générés automatiquement.
+Vérification des Logs : Consultez le fichier error.txt pour toute erreur rencontrée. 
+
+Les fichiers de log pour les films, séries et chaînes ajoutées seront générés automatiquement dans le dossier "log" creer a la racine du script.
 
 # Aide
 
