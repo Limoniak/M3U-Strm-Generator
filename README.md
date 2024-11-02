@@ -90,15 +90,18 @@ Creer un répertoire ou seul le Script sera utiliser pour éviter les erreurs
 
 **Etapes 1 :** 
 
+`python Strm-Generator.py /C`
 Ouvrir votre terminal et lancer cette commande 
-	`python Strm-Generator.py /C` Cette commande génére le fichier de config qui sera utilise pour la suite
+Cette commande génére le fichier de `Config.cfg` qui sera utilise pour la suite
 
 **Etape 2 :**
 
+`python Strm-Generator.py /U`
+
 Une fois les informations modifié dans le fichier Config lancer cette commande 
-	`python Strm-Generator.py /U`
-Un fichier unwantedgroup.cfg sera générer. 
-Ouvrir cefichier et supprimer les groupes de la liste si vous voulez que les groupe soit traités et leur fichiers générer
+	
+Un fichier `unwantedgroup.cfg` sera générer. 
+Ouvrir ce fichier et supprimer les groupes de la liste si vous voulez que les groupe soit traités et leur fichiers générer
 
 **Etape 3 :**
 
