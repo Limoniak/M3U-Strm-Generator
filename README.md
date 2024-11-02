@@ -96,8 +96,13 @@ Ouvrir votre terminal et lancer cette commande
 **Etape 2 :**
 
 Une fois les informations modifié dans le fichier Config lancer cette commande 
-	`python Strm-Generator.py`
+	`python Strm-Generator.py /U`
+Un fichier unwantedgroup.cfg sera générer. 
+Ouvrir cefichier et supprimer les groupes de la liste si vous voulez que les groupe soit traités et leur fichiers générer
 
+**Etape 3 :**
+
+	`python Strm-Generator.py`
 Si vous avez déja un fichier m3u veuillez a bien désactivé le téléchargement dans le fichier Config.cfg
 
 Le traitement sera lancé et vos dossier créer en fonction de vos critéres.
