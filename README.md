@@ -82,13 +82,14 @@ Les fichiers de log pour les films, séries et chaînes ajoutées seront génér
 
 # Aide
 
-Si vous avez des questions ou rencontrez des problèmes, n'hésitez pas à ouvrir une issue sur le dépôt GitHub ou à contacter l'auteur.
-Contributions
+Si vous avez des questions ou rencontrez des problèmes, n'hésitez pas à ouvrir une issue sur le dépôt GitHub.
 
 Les contributions sont les bienvenues ! Si vous souhaitez contribuer à ce projet :
+
 Forkez le projet.
 
 Créez une nouvelle branche :
+
 	git checkout -b feature/YourFeature
 
 Faites vos modifications.
