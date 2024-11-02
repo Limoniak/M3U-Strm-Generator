@@ -1,0 +1,20 @@
+#EXTINF:-1 tvg-id="" tvg-name="##### GENERAL #####" tvg-logo="http://logo-url" group-title="|EU| FRANCE HEVC",##### GENERAL #####
+http://example.com
+#EXTINF:-1 tvg-id="TF1.fr" tvg-name="FR - TF1 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - TF1 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="" tvg-name="FR - TF1+ STAR ACADEMY HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - TF1+ STAR ACADEMY HEVC
+http://example.com
+#EXTINF:-1 tvg-id="France2.fr" tvg-name="FR - FRANCE 2 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - FRANCE 2 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="France3.fr" tvg-name="FR - FRANCE 3 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - FRANCE 3 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="France4.fr" tvg-name="FR - FRANCE 4 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - FRANCE 4 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="France5.fr" tvg-name="FR - FRANCE 5 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - FRANCE 5 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="M6.fr" tvg-name="FR - M6 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - M6 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="C8.fr" tvg-name="FR - C8 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - C8 HEVC
+http://example.com
+#EXTINF:-1 tvg-id="W9.fr" tvg-name="FR - W9 HEVC" tvg-logo="http://example.com/logos" group-title="|EU| FRANCE HEVC",FR - W9 HEVC
+http://example.com
