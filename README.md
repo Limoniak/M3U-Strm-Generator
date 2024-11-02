@@ -1,4 +1,4 @@
-# M3U8-Channel-Manager
+# M3U8-STRM-GENERATOR
 
 Script basé sur ce dépot : https://github.com/trix7777/m2strm?tab=readme-ov-file
 
