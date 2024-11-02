@@ -21,7 +21,9 @@ Ce script permet de trier, filtrer et nettoyer les chaînes en fonction de diver
 
 # Fonctionnalités
 
-- **Gestion des Chaînes** : Recharge et organise les chaînes de télévision à partir d'un fichier de configuration.
+- **Gestion des Chaînes** : Recharge et organise les Chaînes de télévision à partir d'un fichier de configuration.
+- **Gestion des Films** : Recharge et organise les Films à partir d'un fichier de configuration.
+- **Gestion des Series** : Recharge et organise les Series  à partir d'un fichier de configuration. | Chaque serie créér dans chaque dossier de groupes sera transformer en dossier de series pour eviter d'avoir tout épisodes en vrac
 - **Journalisation** : Enregistre les erreurs rencontrées lors du traitement dans un fichier `error.txt`.
 - **Génération de Logs** : Création automatique de fichiers de log pour les nouveaux films, séries et chaînes.
 - **Nettoyage Automatique** : Nettoie les noms de répertoires et fichiers pour éviter les conflits.
