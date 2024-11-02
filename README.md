@@ -38,10 +38,6 @@ Pour installer les dépendances requises, exécutez la commande suivante dans le
 
 `pip install -r requirements.txt`
 
-requests
-logging
-configparser
-
 # Modules utiliser
 
 Modules Utilisés
