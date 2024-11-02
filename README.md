@@ -86,15 +86,15 @@ Le script utilise plusieurs modules Python pour ses fonctionnalités :
 
 Creer un répertoire ou seul le Script sera utiliser pour éviter les erreurs 
 
-Etapes 1 : 
+**Etapes 1 :** 
 
 Ouvrir votre terminal et lancer cette commande 
-	`python m3u8_channel_manager.py /C` Cette commande génére le fichier de config qui sera utilise pour la suite
+	`python Strm-Generator.py /C` Cette commande génére le fichier de config qui sera utilise pour la suite
 
-Etape 2 : 
+**Etape 2 :**
 
 Une fois les informations modifié dans le fichier Config lancer cette commande 
-	`python m3u8_channel_manager.py`
+	`python Strm-Generator.py`
 
 Si vous avez déja un fichier m3u veuillez a bien désactivé le téléchargement dans le fichier Config.cfg
 
