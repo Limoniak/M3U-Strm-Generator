@@ -3,7 +3,7 @@
 Générateur de fichiers et dossier pour affiner votre fichier m3u en classant les fichiers dans des dossiers bien distinct pour ressembler a ceci.
 Parfait pour une médiathéque sur EMBY ou sur PLEX.
 
-**Bien sur ce script a pour but de centraliser vos films et series qui vous appartiennent déjà, aucune promotion pour service divers n'est faite. A utiliser pour votre usage personnel avec les DVD que vous avez achetés ou service M3U fournie par votre opérateur Internet.**
+**Bien sur ce script à pour but de centraliser vos films et series qui vous appartiennent déjà, aucune promotion pour service divers n'est faite. A utiliser pour votre usage personnel avec les DVD que vous avez achetés ou service M3U fournie par votre opérateur Internet.**
 
 --FILMS
 
