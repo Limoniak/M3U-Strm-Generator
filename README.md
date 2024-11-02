@@ -15,7 +15,7 @@ Projet avec ce script :
 
 # Description
 
-**M3U8-Channel-Manager** est un outil Python conçu pour faciliter la gestion et l'organisation des chaînes de télévision à partir de fichiers M3U8. 
+**M3U8-STRM-GENERATOR** est un outil Python conçu pour faciliter la gestion et l'organisation des chaînes de télévision à partir de fichiers M3U8. 
 
 Ce script permet de trier, filtrer et nettoyer les chaînes en fonction de divers critères, tout en assurant une journalisation complète des opérations.
 
@@ -100,6 +100,6 @@ Soumettez une pull request.
 
 Ce projet est sous licence MIT. 
 
-Merci d'utiliser M3U8-Channel-Manager. Nous espérons qu'il répondra à vos besoins en matière de gestion de chaînes de télévision !
+Merci d'utiliser M3U8-STRM-GENERATOR. Nous espérons qu'il répondra à vos besoins en matière de gestion de chaînes de télévision !
 
 markdown
