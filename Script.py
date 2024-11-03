@@ -103,14 +103,8 @@ def create_default_config(config_path):
         <add key="SeriesSubDir" value="SERIE" />
         <add key="TVSubDir" value="TV" />
 
-       <!-- Configuration supplémentaire -->  Pas encore implémenter
-        <add key="DeletePreviousDirEnabled" value="False" />
-        <add key="UnwantedCFGEnabled" value="True" />
-        <add key="VerboseConsoleOutputEnabled" value="False" />
-        <add key="ProgramLogEnabled" value="True" />
-        <add key="PurgeFilesEnabled" value="True" />
-        <add key="SeriesGroupSubdirEnabled" value="True" />
-        <add key="MovieGroupSubdirEnabled" value="True" />
+		<!-- Suppression des préfixes-->
+		<add key="PrefixDel" value="FR - ,UK - ,DE - ,ES - " />
 
         <!-- Téléchargement du fichier m3u -->
         <add key="DownloadM3U8Enabled" value="False" />
@@ -208,7 +202,7 @@ def download_m3u(config):
         log_error(error_message)
 
 ######################################################################################################################
-                                   # Traiter le fichier M3U
+                                   # Traitement le fichier M3U
 ######################################################################################################################
 
 def process_m3u_file(file_path):
@@ -317,7 +311,6 @@ def generate_unwanted_group_file(config_file):
 ######################################################################################################################
                                    #Parametres Fonction FOLDER GENERATOR
 ######################################################################################################################
-
 def log_error(message):
     if not os.path.exists("error.txt"):
         with open("error.txt", "w", encoding='utf-8') as error_file:
@@ -367,7 +360,7 @@ def log_results(new_films, new_series, new_tv, new_others):
                 log_file.write(f"--------------------\n{group_title}\n")
                 log_file.write("\n".join(tvs) + "\n")
             log_file.write("---------------------------------------------------\n")
-            
+          
 def log_global_script_status(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time):
     log_directory = "log"
     if not os.path.exists(log_directory):
@@ -395,14 +388,38 @@ def extract_group_title(line):
     match = re.search(r'group-title="(.*?)"', line)
     return match.group(1) if match else "Unknown"
 
+
+def get_prefixes_from_config(file_path):
+    # Lire le fichier Config.cfg
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    
+    # Chercher la ligne avec la clé "PrefixDel"
+    prefix_del = root.find(".//add[@key='PrefixDel']")
+    
+    if prefix_del is not None:
+        # Récupérer la valeur et la diviser en une liste de préfixes
+        prefixes = prefix_del.get('value', '').split(',')
+        return [prefix.strip() for prefix in prefixes]  # Retourner une liste de préfixes
+    return []
+
+# Récupérer les préfixes à supprimer
+prefixes_to_remove = get_prefixes_from_config('Config.cfg')
+
 def clean_directory_name(name):
+    # Supprimer les préfixes spécifiés
+    for prefix in prefixes_to_remove:
+        name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
     return name
 
 def clean_file_name(name):
-    return re.sub(r'[<>:"/\\|?*]', '_', name)
-    name = re.sub(r'\s+', ' ', name).strip()
+    # Supprimer les préfixes spécifiés
+    for prefix in prefixes_to_remove:
+        name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
+    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+    return re.sub(r'\s+', ' ', name).strip()
 
 def extract_tvg_name(line):
     match = re.search(r'tvg-name="(.*?)"', line)
@@ -652,7 +669,6 @@ def folder_generator():
 
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
-
 ######################################################################################################################
                                    #Derouler du script Logic
 ######################################################################################################################      
