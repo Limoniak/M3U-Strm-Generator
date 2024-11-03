@@ -21,7 +21,7 @@ def log_error(message):
 ######################################################################################################################
 
 def main():
-    print("Début de l'exécution du script...")
+    print("*** Début de l'exécution du script...")
 
     # Obtient le répertoire contenant le script
     script_directory = os.path.dirname(os.path.abspath(__file__))
@@ -29,24 +29,24 @@ def main():
 
     # Vérification de la commande /C avant de charger la configuration
     if len(sys.argv) > 1 and sys.argv[1] == "/C":
-        print("Création du fichier de configuration.")
+        print("*** Création du fichier de configuration.")
         try:
             create_default_config(config_file)
         except Exception as e:
-            log_error(f"Erreur lors de la création du fichier de configuration : {e}")
+            log_error(f"*** Erreur lors de la création du fichier de configuration : {e}")
         return
 
     # Chargement de la configuration, création du fichier Config.cfg si absent
     if not os.path.exists(config_file):
         create_default_config(config_file)
-        print(f"Le fichier de configuration '{config_file}' a été créé. "
-              "Veuillez modifier son contenu avant de relancer le script.")
+        print(f"*** Le fichier de configuration '{config_file}' a été créé. "
+              "*** Veuillez modifier son contenu avant de relancer le script.")
         return
 
     try:
         config = load_config(config_file)
     except Exception as e:
-        log_error(f"Erreur lors du chargement de la configuration : {e}")
+        log_error(f"*** Erreur lors du chargement de la configuration : {e}")
         return
 
     # Vérification des arguments fournis pour d'autres commandes
@@ -56,12 +56,12 @@ def main():
             if os.path.exists("unwantedgroup.old"):
                 os.remove("unwantedgroup.old")
             os.rename("unwantedgroup.cfg", "unwantedgroup.old")
-            print("Le fichier 'unwantedgroup.cfg' existant a été renommé en 'unwantedgroup.old'.")
+            print("*** Le fichier 'unwantedgroup.cfg' existant a été renommé en 'unwantedgroup.old'.")
 
         try:
             retrieve_groups_from_m3u(config["m3u8File"])
         except Exception as e:
-            log_error(f"Erreur lors de la récupération des groupes : {e}")
+            log_error(f"*** Erreur lors de la récupération des groupes : {e}")
         return
 
     # Exécution par défaut
@@ -69,16 +69,16 @@ def main():
         try:
             download_m3u(config)
         except Exception as e:
-            log_error(f"Erreur lors du téléchargement de M3U8 : {e}")
+            log_error(f"*** Erreur lors du téléchargement de M3U8 : {e}")
     else:
-        print("Téléchargement désactivé dans la configuration... On traite le fichier existant...")
+        print("*** Téléchargement désactivé dans la configuration... On traite le fichier existant...")
 
     # Traitement du fichier M3U après le téléchargement (ou s'il est désactivé)
     m3u_file_path = config.get("m3u8File")
     try:
         process_m3u_file(m3u_file_path)
     except Exception as e:
-        log_error(f"Erreur lors du traitement du fichier M3U... {e}")
+        log_error(f"*** Erreur lors du traitement du fichier M3U... {e}")
 
     # Traitement des groupes non désirés
     unwanted_groups_path = "unwantedgroup.cfg"
@@ -131,10 +131,9 @@ def create_default_config(config_path):
         # Écriture du nouveau fichier de configuration
         with open(config_path, "w", encoding="utf-8") as config_file:
             config_file.write(config_content)
-        print(f"Le fichier de configuration par défaut '{config_path}' a été créé.")
 
     except Exception as e:
-        print(f"Erreur lors de la création du fichier de configuration : {str(e)}")
+        print(f"*** Erreur lors de la création du fichier de configuration : {str(e)}")
 
 ######################################################################################################################
                                    # CHARGEMENT DU FICHIER CONFIG 
@@ -146,7 +145,7 @@ def load_config(config_file):
 
     # Vérification si le fichier existe
     if not os.path.exists(config_file):
-        log_error(f"Le fichier de configuration {config_file} n'existe pas.")
+        log_error(f"*** Le fichier de configuration {config_file} n'existe pas.")
         return config  # Retourne un dictionnaire vide si le fichier n'existe pas
 
     # Parse le fichier XML
@@ -170,10 +169,10 @@ def load_config(config_file):
             "DownloadM3U8Enabled": config.get("DownloadM3U8Enabled") == "True"
         }
     except ET.ParseError as e:
-        log_error(f"Erreur lors du parsing du fichier de configuration : {e}")
+        log_error(f"*** Erreur lors du parsing du fichier de configuration : {e}")
         return config
     except Exception as e:
-        log_error(f"Erreur lors du chargement du fichier de configuration : {e}")
+        log_error(f"*** Erreur lors du chargement du fichier de configuration : {e}")
         return config
 
 ######################################################################################################################
@@ -187,19 +186,19 @@ def download_m3u(config):
     password = config.get("UserPass")
     m3u_url = f"{user_url}{user_port}/get.php?username={username}&password={password}&type=m3u_plus&output=ts"
 
-    print("Téléchargement du fichier M3U en cours ...")
+    print("*** Téléchargement du fichier M3U en cours ...")
     try:
         response = requests.get(m3u_url)
         if response.status_code == 200:
             with open(config["m3u8File"], "wb") as file:
                 file.write(response.content)
-            print("Téléchargement du fichier M3U réussi.")
+            print("*** Téléchargement du fichier M3U réussi.")
         else:
-            error_message = f"Erreur de téléchargement : {response.status_code} - {response.text}"
+            error_message = f"*** Erreur de téléchargement : {response.status_code} - {response.text}"
             print(error_message)
             log_error(error_message)
     except requests.RequestException as e:
-        error_message = f"Erreur de requête : {str(e)}"
+        error_message = f"*** Erreur de requête : {str(e)}"
         print(error_message)
         log_error(error_message)
 
@@ -209,7 +208,7 @@ def download_m3u(config):
 
 def process_m3u_file(file_path):
     if file_path is None:
-        error_message = "Le chemin du fichier M3U n'est pas défini dans la configuration."
+        error_message = "*** Le chemin du fichier M3U n'est pas défini dans la configuration."
         print(error_message)
         log_error(error_message)
         return
@@ -220,15 +219,15 @@ def process_m3u_file(file_path):
             with open(file_path, "r", encoding='utf-8') as file:
                 content = file.readlines()
                 # Ajoutez ici le code pour traiter le contenu du fichier
-                print(f"Traitement du fichier M3U en cours...")
+                print(f"*** Traitement du fichier M3U en cours...")
                 # Processus d'analyse et de filtrage ici
                 # Par exemple, filtrer les chaînes en fonction des groupes non désirés
         except Exception as e:
-            error_message = f"Erreur lors de l'ouverture ou du traitement du fichier M3U : {str(e)}"
+            error_message = f"*** Erreur lors de l'ouverture ou du traitement du fichier M3U : {str(e)}"
             print(error_message)
             log_error(error_message)
     else:
-        error_message = f"Le fichier M3U spécifié n'existe pas : {file_path}"
+        error_message = f"*** Le fichier M3U spécifié n'existe pas : {file_path}"
         print(error_message)
         log_error(error_message)
 
@@ -250,13 +249,13 @@ def generate_unwanted_group_file(config_file):
                         break
         except FileNotFoundError:
             with open("error.txt", "a", encoding='utf-8') as error_file:
-                error_file.write(f"Fichier de configuration non trouvé : {config_file}\n")
+                error_file.write(f"*** Fichier de configuration non trouvé : {config_file}\n")
         return m3u8_file
 
     def retrieve_groups_from_m3u(m3u8_file):
         if not os.path.exists(m3u8_file):
             with open("error.txt", "a", encoding='utf-8') as error_file:
-                error_file.write(f"Le fichier {m3u8_file} n'existe pas.\n")
+                error_file.write(f"*** Le fichier {m3u8_file} n'existe pas.\n")
             return
 
         with open(m3u8_file, "r", encoding='utf-8') as file:
@@ -301,14 +300,14 @@ def generate_unwanted_group_file(config_file):
             for group in sorted_groups:
                 f.write(group + "\n")
 
-        print(f"{len(sorted_groups)} groupes récupérés et écrits dans unwantedgroup.cfg.")
+        print(f"*** {len(sorted_groups)} groupes récupérés et écrits dans unwantedgroup.cfg.")
 
     # Exécution des étapes
     m3u8_file = get_m3u8_file_path()
     if m3u8_file:
         retrieve_groups_from_m3u(m3u8_file)
     else:
-        print("Aucun fichier M3U8 trouvé dans la configuration.")
+        print("*** Aucun fichier M3U8 trouvé dans la configuration.")
 
 ######################################################################################################################
                                    #Parametres Fonction FOLDER GENERATOR
@@ -405,20 +404,49 @@ def get_prefixes_from_config(file_path):
         return [prefix.strip() for prefix in prefixes]  # Retourner une liste de préfixes
     return []
 
-# Récupérer les préfixes à supprimer
-prefixes_to_remove = get_prefixes_from_config('Config.cfg')
+prefixes_displayed = False
+
+def prefixes_to_remove():
+    global prefixes_displayed  # Indique que nous utilisons la variable globale
+    
+    # Nom du fichier de configuration
+    config_file_name = 'Config.cfg'
+    
+    # Construire le chemin du fichier dans le répertoire actuel
+    config_file_path = os.path.join(os.getcwd(), config_file_name)
+
+    # Vérifiez si le fichier de configuration existe
+    if not os.path.exists(config_file_path):
+        print(f"*** Le fichier de configuration '{config_file_name}' est manquant.")
+        print("*** Faire cette commande '/C' pour le générer.")
+        return []  # Retourne une liste vide si le fichier n'existe pas
+
+    # Récupérer les préfixes
+    prefixes_to_remove = get_prefixes_from_config('Config.cfg')
+    
+    # Affichage unique des préfixes
+    if not prefixes_displayed:  # Vérifiez si le message a déjà été affiché
+        print("*** Prefixes to remove:", prefixes_to_remove)
+        prefixes_displayed = True  # Marquez le message comme affiché
+
+    # Retourner les préfixes
+    return prefixes_to_remove
 
 def clean_directory_name(name):
+    # Récupérer les préfixes à supprimer
+    prefixes = prefixes_to_remove()  # Appel de la fonction pour obtenir la liste des préfixes
     # Supprimer les préfixes spécifiés
-    for prefix in prefixes_to_remove:
+    for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
     return name
 
 def clean_file_name(name):
+    # Récupérer les préfixes à supprimer
+    prefixes = prefixes_to_remove()  # Appel de la fonction pour obtenir la liste des préfixes
     # Supprimer les préfixes spécifiés
-    for prefix in prefixes_to_remove:
+    for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
     return re.sub(r'\s+', ' ', name).strip()
@@ -448,7 +476,6 @@ def read_unwanted_group(unwanted_file_path):
         log_error("Aucun groupe indésirable trouvé dans le fichier.")  # Enregistrer une information si le fichier est vide
     
     return unwanted_groups
-
 
 def process_tv(line, output_directory, link, config_path):
     group_title = extract_group_title(line)
@@ -515,7 +542,7 @@ def process_series(line, output_directory, link, config_path):
             with open(full_file_path, 'w', encoding='utf-8') as series_file:
                 series_file.write(link)
             return 1, clean_file_name(tvg_name)
-
+        
         except Exception as e:
             log_error(f"Erreur lors de l'écriture du fichier: {str(e)}")
             return 0, clean_file_name(tvg_name)  
@@ -578,11 +605,9 @@ def process_others(line, output_directory, link, config_path):
     except Exception as e:
         log_error(f"Erreur lors de l'écriture du fichier: {str(e)}")
         return 0, clean_file_name(tvg_name)  # Renvoie 0 et le nom de la chaîne en cas d'erreur
-
 ######################################################################################################################
                                    #Fonction FOLDER GENERATOR
 ######################################################################################################################
-    
 def folder_generator():
     start_time = time.time()  # Démarre le compteur de temps
 
@@ -597,11 +622,14 @@ def folder_generator():
 
         films_dir, series_dir, tv_dir = get_directory_names(config_path)
 
-        new_films = {}
-        new_series = {}
-        new_tv = {}
-        new_others = {}  # Pour garder une trace des autres fichiers ajoutés
+        # Compteurs pour les films, séries, chaînes TV et autres
+        new_films, existing_films, skipped_films = {}, {}, {}
+        new_series, existing_series, skipped_series = {}, {}, {}
+        new_tv, existing_tv, skipped_tv = {}, {}, {}
+        new_others, existing_others, skipped_others = {}, {}, {}
 
+        m3u8_file = root.find(".//add[@key='m3u8File']").get('value')
+        
         m3u8_file = root.find(".//add[@key='m3u8File']").get('value')
         with open(m3u8_file, 'r', encoding='utf-8') as m3u8:
             for line in m3u8:
@@ -644,92 +672,95 @@ def folder_generator():
                         if group_title not in new_others:
                             new_others[group_title] = []
                         new_others[group_title].append(result[1])
+                        
 
-        # Enregistrement des résultats dans les logs
+        # Logging des résultats
         log_results(new_films, new_series, new_tv, new_others)
 
-        # Calcul des totaux pour le log global
+        # Calcul des totaux pour l'affichage final
         total_films_added = sum(len(v) for v in new_films.values())
         total_series_added = sum(len(v) for v in new_series.values())
         total_tv_added = sum(len(v) for v in new_tv.values())
         total_others_added = sum(len(v) for v in new_others.values())
 
-        # Calcul du temps d'exécution
-        execution_time_seconds = time.time() - start_time  # Temps d'exécution en secondes
-        execution_time_formatted = format_execution_time(execution_time_seconds)  # Formaté
+        execution_time_seconds = time.time() - start_time
+        execution_time_formatted = format_execution_time(execution_time_seconds)
 
-        # Log global de l'exécution
         log_global_script_status(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
 
-        # Affichage des totaux dans la console
-        print(f"Traitement terminé.")
-        print(f"Total Films ajoutés : {total_films_added}")
-        print(f"Total Series ajoutées : {total_series_added}")
-        print(f"Total Chaines TV ajoutées : {total_tv_added}")
-        print(f"Total Others ajoutées : {total_others_added}")
-        print(f"Temps d'exécution : {execution_time_formatted}")  # Affiche le temps d'exécution formaté
+        # Affichage des totaux formatés
+        print("*** Movies summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
+            total_films_added, len(skipped_films), len(existing_films), total_films_added + len(existing_films)))
+
+        print("*** Episodes summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
+            total_series_added, len(skipped_series), len(existing_series), total_series_added + len(existing_series)))
+
+        print("*** TV-channels summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
+            total_tv_added, len(skipped_tv), len(existing_tv), total_tv_added + len(existing_tv)))
+
+        print("*** Processing time: {}".format(execution_time_formatted))
 
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
+        
 ######################################################################################################################
                                    #Derouler du script Logic
 ######################################################################################################################      
 
 if __name__ == "__main__":
-    # Vérifier l'existence du fichier de configuration
+    # Chemin des fichiers de configuration
     config_file = "Config.cfg"
     unwanted_file_path = "unwantedgroup.cfg"
 
-    # Vérifier si une commande de création de configuration est donnée
+    # Vérifier la commande de création de configuration
     if len(sys.argv) > 1 and sys.argv[1] == "/C":
-        print("Commande '/C' détectée : Création du fichier de configuration...")
-        main()  # Appelle main pour créer la configuration avec la commande /C
-        sys.exit(0)  # Sortir après la création de la config
+        print("*** Commande '/C' détectée : Création du fichier de configuration...")
+        create_default_config(config_file)
+        print("*** Le fichier de configuration 'Config.cfg' a été créé avec succès.")
+        sys.exit(0)
 
     # Vérifier si le fichier de configuration existe
     if not os.path.exists(config_file):
-        print("Le fichier de configuration 'Config.cfg' est manquant.")
-        print("Veuillez exécuter le script avec '/C' pour créer le fichier de configuration.")
+        print("*** Le fichier de configuration 'Config.cfg' est manquant.")
+        print("*** Veuillez exécuter le script avec '/C' pour créer le fichier de configuration.")
         sys.exit(1)
 
     # Charger la configuration
     try:
         config = load_config(config_file)
     except Exception as e:
-        log_error(f"Erreur lors du chargement de la configuration : {e}")
+        log_error(f"*** Erreur lors du chargement de la configuration : {e}")
         sys.exit(1)
 
-    # Vérifier si l'utilisateur a fourni l'argument /U
+    # Vérifier l'argument /U pour générer unwantedgroup.cfg
     if len(sys.argv) > 1 and sys.argv[1] == "/U":
-        print("Commande '/U' détectée : Récupération des groupes indésirables...")
-        generate_unwanted_group_file(config_file)  # Appeler la fonction pour générer le fichier unwantedgroup.cfg
-        print("Le fichier 'unwantedgroup.cfg' a été généré.")
-        sys.exit(0)  # Arrêter le script après la génération du fichier
+        print("*** Commande '/U' détectée : Récupération des groupes indésirables...")
+        generate_unwanted_group_file(config_file)
+        print("*** Le fichier 'unwantedgroup.cfg' a été généré avec succès.")
+        sys.exit(0)
 
-    # Vérifier si le fichier unwantedgroup.cfg existe
+    # Vérifier si unwantedgroup.cfg existe
     unwanted_group = read_unwanted_group(unwanted_file_path)
-
     if unwanted_group is None:
-        print("Le fichier 'unwantedgroup.cfg' n'existe pas.")
-        print("Veuillez exécuter le script avec l'option '/U' pour le générer.")
-        sys.exit(1)  # Termine l'exécution si le fichier n'existe pas
+        print("*** Le fichier 'unwantedgroup.cfg' n'existe pas.")
+        print("*** Veuillez exécuter le script avec l'option '/U' pour le générer.")
+        sys.exit(1)
 
-    # Vérifier si le téléchargement est activé dans la configuration
+    # Suite du traitement
     download_enabled = config.get("DownloadM3U8Enabled")
     m3u_file_path = config.get("m3u8File")
 
     if download_enabled:
-        print("Téléchargement du fichier M3U activé...")
+        print("*** Téléchargement du fichier M3U activé...")
         download_m3u(config)
     else:
-        print("Téléchargement désactivé dans la configuration... On traite le fichier existant...")
+        print("*** Téléchargement désactivé dans la configuration... On traite le fichier existant...")
 
-    # Traitement du fichier M3U après le téléchargement (ou s'il est désactivé)
+    # Traitement du fichier M3U
     process_m3u_file(m3u_file_path)
 
-    # Si des groupes ont été récupérés, lancer folder_generator
-    if unwanted_group:  # Vérifier si unwanted_group est défini et non vide
+    # Si unwanted_group est défini, lancer folder_generator
+    if unwanted_group:
         folder_generator()
 
-    # Fin du script
-    print("Fin du script.")
+    print("*** End of Script.")
