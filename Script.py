@@ -442,7 +442,9 @@ def clean_directory_name(name):
     # Supprimer les préfixes spécifiés
     for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
-    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+    
+    # Nettoyer les caractères non valides sauf les crochets []
+    name = re.sub(r'[<>:"/\\|?*...]', '', name)  # Retirer [ et ] de la liste
     name = re.sub(r'\s+', ' ', name).strip()
 
     # Remplacer "4K" ou "4k" par "UHD"
@@ -456,7 +458,9 @@ def clean_file_name(name):
     # Supprimer les préfixes spécifiés
     for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
-    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+
+    # Supprimer les caractères non valides, y compris ':'
+    name = re.sub(r'[<>:"/\\|?*:...]', '', name)
 
     # Remplacer "4K" ou "4k" par "UHD"
     name = name.replace('4K', 'UHD').replace('4k', 'UHD')
@@ -496,12 +500,13 @@ def process_tv(line, output_directory, link, config_path):
 
     tv_directory = os.path.join(output_directory, tv_dir, clean_directory_name(group_title))
 
-    if not os.path.exists(tv_directory):
-        os.makedirs(tv_directory)
+    # Création du dossier avec exist_ok=True
+    os.makedirs(tv_directory, exist_ok=True)
 
     file_name = f"{clean_file_name(tvg_name)}.strm"
     full_file_path = os.path.join(tv_directory, file_name)
 
+    # Vérifiez si le fichier existe déjà
     if not os.path.exists(full_file_path):
         with open(full_file_path, 'w', encoding='utf-8') as tv_file:
             tv_file.write(link)
@@ -516,12 +521,13 @@ def process_film(line, output_directory, link, config_path):
 
     film_directory = os.path.join(output_directory, films_dir, clean_directory_name(group_title))
 
-    if not os.path.exists(film_directory):
-        os.makedirs(film_directory)
+    # Création du dossier avec exist_ok=True
+    os.makedirs(film_directory, exist_ok=True)
 
     file_name = f"{clean_file_name(film_name)}.strm"
     full_file_path = os.path.join(film_directory, file_name)
 
+    # Vérifiez si le fichier existe déjà
     if not os.path.exists(full_file_path):
         with open(full_file_path, 'w', encoding='utf-8') as film_file:
             film_file.write(link)
@@ -532,22 +538,27 @@ def process_series(line, output_directory, link, config_path):
     group_title = extract_group_title(line)  
     tvg_name = extract_tvg_name(line)  
 
+    # Chemin du répertoire des séries
     series_directory = os.path.join(output_directory, "SERIE")
     os.makedirs(series_directory, exist_ok=True)
 
+    # Création du répertoire pour le groupe
     group_directory = os.path.join(series_directory, clean_directory_name(group_title))
     os.makedirs(group_directory, exist_ok=True)
 
+    # Nettoyer le nom de la série
     series_name = re.sub(r' S\d+ E\d+', '', tvg_name)
     series_name_clean = clean_directory_name(series_name)
+    
+    # Création du répertoire de la série
     series_sub_dir = os.path.join(group_directory, series_name_clean)
+    os.makedirs(series_sub_dir, exist_ok=True)  # Crée le répertoire de la série
 
-    os.makedirs(series_sub_dir, exist_ok=True)
-
+    # Définition du nom du fichier
     file_name = f"{clean_file_name(tvg_name)}.strm"
     full_file_path = os.path.join(series_sub_dir, file_name)
 
-    # Vérifiez si le chemin complet existe avant d'écrire le fichier
+    # Vérifiez si le fichier existe déjà
     if not os.path.exists(full_file_path):
         try:
             with open(full_file_path, 'w', encoding='utf-8') as series_file:
@@ -558,7 +569,6 @@ def process_series(line, output_directory, link, config_path):
             log_error(f"Erreur lors de l'écriture du fichier: {str(e)}")
             return 0, clean_file_name(tvg_name)  
 
-    log_error(f"Le fichier {full_file_path} existe déjà.")  # Journaliser si le fichier existe déjà
     return 0, clean_file_name(tvg_name)
 
 def process_others(line, output_directory, link, config_path):
@@ -714,7 +724,7 @@ def folder_generator():
 
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
-
+   
 ######################################################################################################################
                                    #Discord Notification
 ######################################################################################################################      
