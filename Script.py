@@ -107,7 +107,7 @@ def create_default_config(config_path):
 		<add key="PrefixDel" value="FR - ,UK - ,DE - ,ES - " />
 		
 		<!-- Discord Bot-->
-		<add key="DiscordBotEnabled" value="True" />
+		<add key="DiscordBotEnabled" value="False" />
 		<add key="DiscordBot" value="example.com" />
 
         <!-- Téléchargement du fichier m3u -->
