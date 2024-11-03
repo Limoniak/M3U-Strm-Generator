@@ -444,6 +444,10 @@ def clean_directory_name(name):
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
     name = re.sub(r'\s+', ' ', name).strip()
+
+    # Remplacer "4K" ou "4k" par "UHD"
+    name = name.replace('4K', 'UHD').replace('4k', 'UHD')
+
     return name
 
 def clean_file_name(name):
@@ -453,6 +457,10 @@ def clean_file_name(name):
     for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
     name = re.sub(r'[<>:"/\\|?*]', '_', name)
+
+    # Remplacer "4K" ou "4k" par "UHD"
+    name = name.replace('4K', 'UHD').replace('4k', 'UHD')
+    
     return re.sub(r'\s+', ' ', name).strip()
 
 def extract_tvg_name(line):
