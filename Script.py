@@ -163,6 +163,7 @@ def load_config(config_file):
         # Retourne le dictionnaire avec les clés attendues
         return {
             "UserURL": config.get("UserURL"),
+            "UserPort": config.get("UserPort"),
             "UserName": config.get("UserName"),
             "UserPass": config.get("UserPass"),
             "m3u8File": config.get("m3u8File"),
@@ -181,9 +182,10 @@ def load_config(config_file):
 
 def download_m3u(config):
     user_url = config.get("UserURL")
+    user_port = config.get("UserPort")
     username = config.get("UserName")
     password = config.get("UserPass")
-    m3u_url = f"{user_url}/get.php?username={username}&password={password}&type=m3u_plus&output=ts"
+    m3u_url = f"{user_url}{user_port}/get.php?username={username}&password={password}&type=m3u_plus&output=ts"
 
     print("Téléchargement du fichier M3U en cours ...")
     try:
