@@ -105,6 +105,10 @@ def create_default_config(config_path):
 
 		<!-- Suppression des préfixes-->
 		<add key="PrefixDel" value="FR - ,UK - ,DE - ,ES - " />
+		
+		<!-- Discord Bot-->
+		<add key="DiscordBotEnabled" value="True" />
+		<add key="DiscordBot" value="example.com" />
 
         <!-- Téléchargement du fichier m3u -->
         <add key="DownloadM3U8Enabled" value="False" />
@@ -672,7 +676,6 @@ def folder_generator():
                             new_others[group_title] = []
                         new_others[group_title].append(result[1])
                         
-
         # Logging des résultats
         log_results(new_films, new_series, new_tv, new_others)
 
@@ -699,9 +702,85 @@ def folder_generator():
 
         print("*** Processing time: {}".format(execution_time_formatted))
 
+        return total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted
+
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
-        
+
+######################################################################################################################
+                                   #Discord Notification
+######################################################################################################################      
+
+def Discord_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted):
+    # Nom du fichier de configuration
+    config_file_name = 'Config.cfg'
+    
+    # Construire le chemin du fichier dans le répertoire actuel
+    config_file_path = os.path.join(os.getcwd(), config_file_name)
+
+    # Vérifiez si le fichier de configuration existe
+    if not os.path.exists(config_file_path):
+        print(f"*** Le fichier de configuration '{config_file_name}' est manquant.")
+        print("*** Faire cette commande '/C' pour le générer.")
+        return  # Retourne si le fichier n'existe pas
+
+    # Charger le fichier de configuration
+    tree = ET.parse(config_file_path)
+    root = tree.getroot()
+
+    # Chercher la clé "DiscordBotEnabled"
+    discordbot_enabled = root.find(".//add[@key='DiscordBotEnabled']")
+    if discordbot_enabled is None:
+        print("*** Clé 'DiscordBotEnabled' est vide ou introuvable dans la configuration.")
+        return  # Retourne si la clé n'existe pas
+
+    # Vérifiez si la valeur est "True" ou "False"
+    if discordbot_enabled.get('value', 'False') == 'True':
+        # Notifications Discord sont activées
+        print("*** Notifications Discord sont activées.")
+
+        # Chercher la clé "DiscordBot" pour obtenir le webhook
+        DiscordBot = root.find(".//add[@key='DiscordBot']")
+        if DiscordBot is not None and DiscordBot.get('value'):
+            webhook_url = DiscordBot.get('value')
+            
+            # Construire le message avec les résultats de la fonction folder_generator
+            message = (
+                "```markdown\n"  # Début du bloc de code
+                "📝 Résumé du traitement\n"
+                "===========================\n\n"
+
+                f"📽️ Films ajoutés :    {total_films_added}\n\n"
+                
+                f"📺 Séries ajoutées :   {total_series_added}\n\n"
+                
+                f"📡 Chaînes TV ajoutées : {total_tv_added}\n\n"
+                
+                f"📁 Autres ajoutés :     {total_others_added}\n\n"
+                
+                f"⏱️ Temps d'exécution :   {execution_time_formatted}\n\n"
+                
+                "===========================\n"
+                "✅ Fin du résumé\n"
+                "```"  # Fin du bloc de code
+            )
+            
+            payload = {
+                "content": message
+            }
+            try:
+                response = requests.post(webhook_url, json=payload)
+                if response.status_code == 204:
+                    print("*** Message envoyé avec succès à Discord.")
+                else:
+                    print(f"*** Échec de l'envoi du message. Code d'erreur : {response.status_code}")
+            except Exception as e:
+                print(f"*** Une erreur s'est produite lors de l'envoi du message : {e}")
+        else:
+            print("*** Le lien 'DiscordBot' est vide ou incorrect.")
+    else:
+        print("*** Notifications Discord sont désactivées.")
+   
 ######################################################################################################################
                                    #Derouler du script Logic
 ######################################################################################################################      
@@ -760,6 +839,9 @@ if __name__ == "__main__":
 
     # Si unwanted_group est défini, lancer folder_generator
     if unwanted_group:
-        folder_generator()
-
+        total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted = folder_generator()
+    
+    if folder_generator:
+        Discord_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
+      
     print("*** End of Script.")
