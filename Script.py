@@ -466,8 +466,7 @@ def get_directory_names(config_path):
 def read_unwanted_group(unwanted_file_path):
     """Lit le fichier unwantedgroup.cfg et renvoie une liste de group-title indésirables."""
     if not os.path.exists(unwanted_file_path):
-        log_error(f"Le fichier {unwanted_file_path} n'existe pas.")  # Enregistrer une erreur dans le log
-        return []  # Retourne une liste vide si le fichier n'existe pas
+        return  # Retourne une liste vide si le fichier n'existe pas
     
     with open(unwanted_file_path, 'r', encoding='utf-8') as file:
         unwanted_groups = {line.strip() for line in file if line.strip()}  # Utilisation d'un set pour éviter les doublons
