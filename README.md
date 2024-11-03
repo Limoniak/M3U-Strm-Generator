@@ -135,5 +135,3 @@ Soumettez une pull request.
 Ce projet est sous licence MIT. 
 
 Merci d'utiliser M3U8-STRM-GENERATOR. Nous espérons qu'il répondra à vos besoins en matière de gestion de chaînes de télévision !
-
-markdown
