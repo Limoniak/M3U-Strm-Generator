@@ -36,8 +36,8 @@ Le dépot n'étant plus a jour je souhaite faire quelque améliorations
 
 Projet avec ce script :
 
-- Suppresion des préfixes pour éviter les erreur avec Emby/Plex etc
-- Ajout d'un webhooks Discord pour recevoir les données de l'éxecution du script
+- ✅ Suppresion des préfixes pour éviter les erreur avec Emby/Plex etc
+- ✅ Ajout d'un webhooks Discord pour recevoir les données de l'éxecution du script
 - Suppresion de doublons de films présent dans plusieurs répertoire
 - Création de dossier pour plusieurs films avec plusieurs version ou par collection
 
