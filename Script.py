@@ -538,19 +538,17 @@ def process_series(line, output_directory, link, config_path):
     group_title = extract_group_title(line)  
     tvg_name = extract_tvg_name(line)  
 
-    # Chemin du répertoire des séries
-    series_directory = os.path.join(output_directory, "SERIE")
-    os.makedirs(series_directory, exist_ok=True)
+    films_dir, series_dir, tv_dir = get_directory_names(config_path)
 
-    # Création du répertoire pour le groupe
-    group_directory = os.path.join(series_directory, clean_directory_name(group_title))
-    os.makedirs(group_directory, exist_ok=True)
+    # Création du dossier pour le groupe
+    group_directory = os.path.join(output_directory, series_dir, clean_directory_name(group_title))
+    os.makedirs(group_directory, exist_ok=True)  # Crée le répertoire pour le groupe
 
     # Nettoyer le nom de la série
     series_name = re.sub(r' S\d+ E\d+', '', tvg_name)
     series_name_clean = clean_directory_name(series_name)
-    
-    # Création du répertoire de la série
+
+    # Création du répertoire pour la série à l'intérieur du répertoire du groupe
     series_sub_dir = os.path.join(group_directory, series_name_clean)
     os.makedirs(series_sub_dir, exist_ok=True)  # Crée le répertoire de la série
 
@@ -560,16 +558,11 @@ def process_series(line, output_directory, link, config_path):
 
     # Vérifiez si le fichier existe déjà
     if not os.path.exists(full_file_path):
-        try:
-            with open(full_file_path, 'w', encoding='utf-8') as series_file:
-                series_file.write(link)
-            return 1, clean_file_name(tvg_name)
-        
-        except Exception as e:
-            log_error(f"Erreur lors de l'écriture du fichier: {str(e)}")
-            return 0, clean_file_name(tvg_name)  
+        with open(full_file_path, 'w', encoding='utf-8') as series_file:
+            series_file.write(link)
+        return 1, clean_file_name(tvg_name)  # Renvoie 1 et le nom de la série
 
-    return 0, clean_file_name(tvg_name)
+    return 0, clean_file_name(tvg_name)  # Renvoie 0 si le fichier existe déjà
 
 def process_others(line, output_directory, link, config_path):
     group_title = extract_group_title(line)  # Extraction du titre de groupe
