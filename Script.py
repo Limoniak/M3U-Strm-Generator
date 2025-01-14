@@ -105,8 +105,6 @@ def create_default_config(config_path):
         <add key="m3u8File" value="{os.path.join(current_directory, 'original.m3u8')}" />
 
         <!-- Renommage des dossiers -->
-        <add key="MoviesSubDir" value="FILMS" />
-        <add key="SeriesSubDir" value="SERIE" />
         <add key="TVSubDir" value="TV" />
 
         <!-- Suppression des préfixes-->
@@ -291,9 +289,7 @@ def generate_unwanted_group_file(config_file):
         # Classer les groupes selon les sections demandées
         sorted_groups = []
         sorted_groups.extend(sorted([group for group in all_groups if "|" in group]))  # Section 1: groupes avec "|"
-        sorted_groups.extend(sorted([group for group in all_groups if group.startswith("VOD")]))  # Section 2: VOD
-        sorted_groups.extend(sorted([group for group in all_groups if group.startswith("SRS")]))  # Section 3: SRS
-        sorted_groups.extend(sorted([group for group in all_groups if not (group.startswith("VOD") or group.startswith("SRS") or "|" in group)]))  # Section 4: tout le reste
+        sorted_groups.extend(sorted([group for group in all_groups if not ("|" in group)]))  # Section 2: tout le reste
 
         # Créer le fichier unwantedgroup.cfg
         if os.path.exists("unwantedgroup.cfg"):
@@ -326,32 +322,14 @@ def generate_unwanted_group_file(config_file):
 ######################################################################################################################
                                    #Paramètres Fonction FOLDER GENERATOR
 ######################################################################################################################
-def log_results(new_films, new_series, new_tv, new_others):
+def log_results(new_tv, new_others):
     log_directory = "log"
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    film_log_file_path = os.path.join(log_directory, f"NewFilms-{now}.txt")
-    series_log_file_path = os.path.join(log_directory, f"NewSeries-{now}.txt")
     tv_log_file_path = os.path.join(log_directory, f"NewTV-{now}.txt")
     others_log_file_path = os.path.join(log_directory, f"NewOthers-{now}.txt")
-
-    if new_films:
-        with open(film_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {now}\n")
-            for group_title, films in new_films.items():
-                log_file.write(f"--------------------\n{group_title}\n")
-                log_file.write("\n".join(films) + "\n")
-            log_file.write("---------------------------------------------------\n")
-
-    if new_series:
-        with open(series_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {now}\n")
-            for group_title, series in new_series.items():
-                log_file.write(f"--------------------\n{group_title}\n")
-                log_file.write("\n".join(series) + "\n")
-            log_file.write("---------------------------------------------------\n")
 
     if new_tv:
         with open(tv_log_file_path, 'a', encoding='utf-8') as log_file:
@@ -369,7 +347,7 @@ def log_results(new_films, new_series, new_tv, new_others):
                 log_file.write("\n".join(tvs) + "\n")
             log_file.write("---------------------------------------------------\n")
 
-def log_global_script_status(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time):
+def log_global_script_status(total_tv_added, total_others_added, execution_time):
     log_directory = "log"
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
@@ -379,8 +357,6 @@ def log_global_script_status(total_films_added, total_series_added, total_tv_add
 
     with open(global_log_file_path, 'a', encoding='utf-8') as log_file:
         log_file.write(f"Traitement Terminé le {now}\n")
-        log_file.write(f"Total Films ajoutés : {total_films_added}\n")
-        log_file.write(f"Total Séries ajoutées : {total_series_added}\n")
         log_file.write(f"Total Chaînes TV ajoutées : {total_tv_added}\n")
         log_file.write(f"Total Others TV ajoutées : {total_others_added}\n")
         log_file.write(f"Temps d'exécution : {execution_time}\n")  # Inclure le temps formaté
@@ -476,10 +452,8 @@ def extract_tvg_name(line):
 def get_directory_names(config_path):
     tree = ET.parse(config_path)
     root = tree.getroot()
-    films_dir = root.find(".//add[@key='MoviesSubDir']").get('value')
-    series_dir = root.find(".//add[@key='SeriesSubDir']").get('value')
     tv_dir = root.find(".//add[@key='TVSubDir']").get('value')
-    return films_dir, series_dir, tv_dir
+    return tv_dir
 
 def read_unwanted_group(unwanted_file_path):
     """Lit le fichier unwantedgroup.cfg et renvoie une liste de group-title indésirables."""
@@ -498,7 +472,7 @@ def process_tv(line, output_directory, link, config_path):
     group_title = extract_group_title(line)
     tvg_name = extract_tvg_name(line)
 
-    films_dir, series_dir, tv_dir = get_directory_names(config_path)
+    tv_dir = get_directory_names(config_path)
 
     tv_directory = os.path.join(output_directory, tv_dir, clean_directory_name(group_title))
 
@@ -514,57 +488,6 @@ def process_tv(line, output_directory, link, config_path):
             tv_file.write(link)
         return 1, clean_file_name(tvg_name)  # Renvoie 1 et le nom de la chaîne
     return 0, clean_file_name(tvg_name)
-
-def process_film(line, output_directory, link, config_path):
-    group_title = extract_group_title(line)
-    film_name = extract_tvg_name(line)
-
-    films_dir, series_dir, tv_dir = get_directory_names(config_path)
-
-    film_directory = os.path.join(output_directory, films_dir, clean_directory_name(group_title))
-
-    # Création du dossier avec exist_ok=True
-    os.makedirs(film_directory, exist_ok=True)
-
-    file_name = f"{clean_file_name(film_name)}.strm"
-    full_file_path = os.path.join(film_directory, file_name)
-
-    # Vérifier si le fichier existe déjà
-    if not os.path.exists(full_file_path):
-        with open(full_file_path, 'w', encoding='utf-8') as film_file:
-            film_file.write(link)
-        return 1, clean_file_name(film_name)  # Renvoie 1 et le nom du film
-    return 0, clean_file_name(film_name)
-
-def process_series(line, output_directory, link, config_path):
-    group_title = extract_group_title(line)
-    tvg_name = extract_tvg_name(line)
-
-    films_dir, series_dir, tv_dir = get_directory_names(config_path)
-
-    # Création du dossier pour le groupe
-    group_directory = os.path.join(output_directory, series_dir, clean_directory_name(group_title))
-    os.makedirs(group_directory, exist_ok=True)  # Crée le répertoire pour le groupe
-
-    # Nettoyer le nom de la série
-    series_name = re.sub(r' S\d+ E\d+', '', tvg_name)
-    series_name_clean = clean_directory_name(series_name)
-
-    # Création du répertoire pour la série à l'intérieur du répertoire du groupe
-    series_sub_dir = os.path.join(group_directory, series_name_clean)
-    os.makedirs(series_sub_dir, exist_ok=True)  # Crée le répertoire de la série
-
-    # Définition du nom du fichier
-    file_name = f"{clean_file_name(tvg_name)}.strm"
-    full_file_path = os.path.join(series_sub_dir, file_name)
-
-    # Vérifier si le fichier existe déjà
-    if not os.path.exists(full_file_path):
-        with open(full_file_path, 'w', encoding='utf-8') as series_file:
-            series_file.write(link)
-        return 1, clean_file_name(tvg_name)  # Renvoie 1 et le nom de la série
-
-    return 0, clean_file_name(tvg_name)  # Renvoie 0 si le fichier existe déjà
 
 def process_others(line, output_directory, link, config_path):
     group_title = extract_group_title(line)  # Extraction du titre de groupe
@@ -637,11 +560,9 @@ def folder_generator():
         root = tree.getroot()
         output_directory = root.find(".//add[@key='OutDirectory']").get('value')
 
-        films_dir, series_dir, tv_dir = get_directory_names(config_path)
+        tv_dir = get_directory_names(config_path)
 
-        # Compteurs pour les films, séries, chaînes TV et autres
-        new_films, existing_films, skipped_films = {}, {}, {}
-        new_series, existing_series, skipped_series = {}, {}, {}
+        # Compteurs pour les chaînes TV et autres
         new_tv, existing_tv, skipped_tv = {}, {}, {}
         new_others, existing_others, skipped_others = {}, {}, {}
 
@@ -661,21 +582,7 @@ def folder_generator():
                     continue  # Passe au groupe suivant si c'est indésirable
 
                 # Classification basée sur le group-title
-                if "VOD" in group_title:
-                    result = process_film(line, output_directory, link, config_path)
-                    if result[0]:  # Vérifie si un nouveau film a été ajouté
-                        if group_title not in new_films:
-                            new_films[group_title] = []
-                        new_films[group_title].append(result[1])
-
-                elif "SRS" in group_title:
-                    result = process_series(line, output_directory, link, config_path)
-                    if result[0]:  # Vérifie si une nouvelle série a été ajoutée
-                        if group_title not in new_series:
-                            new_series[group_title] = []
-                        new_series[group_title].append(result[1])
-
-                elif "|" in group_title:
+                if "|" in group_title:
                     result = process_tv(line, output_directory, link, config_path)
                     if result[0]:  # Vérifie si une nouvelle chaîne TV a été ajoutée
                         if group_title not in new_tv:
@@ -691,32 +598,24 @@ def folder_generator():
                         new_others[group_title].append(result[1])
 
         # Logging des résultats
-        log_results(new_films, new_series, new_tv, new_others)
+        log_results(new_tv, new_others)
 
         # Calcul des totaux pour l'affichage final
-        total_films_added = sum(len(v) for v in new_films.values())
-        total_series_added = sum(len(v) for v in new_series.values())
         total_tv_added = sum(len(v) for v in new_tv.values())
         total_others_added = sum(len(v) for v in new_others.values())
 
         execution_time_seconds = time.time() - start_time
         execution_time_formatted = format_execution_time(execution_time_seconds)
 
-        log_global_script_status(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
+        log_global_script_status(total_tv_added, total_others_added, execution_time_formatted)
 
         # Affichage des totaux formatés
-        print("*** Movies summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
-            total_films_added, len(skipped_films), len(existing_films), total_films_added + len(existing_films)))
-
-        print("*** Episodes summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
-            total_series_added, len(skipped_series), len(existing_series), total_series_added + len(existing_series)))
-
         print("*** TV-channels summary: {} new, {} skipped (whereof {} dupes), {} in total".format(
             total_tv_added, len(skipped_tv), len(existing_tv), total_tv_added + len(existing_tv)))
 
         print("*** Processing time: {}".format(execution_time_formatted))
 
-        return total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted
+        return total_tv_added, total_others_added, execution_time_formatted
 
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
@@ -725,7 +624,7 @@ def folder_generator():
                                    #Telegram Notification
 ######################################################################################################################
 
-def Telegram_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted):
+def Telegram_Notification(total_tv_added, total_others_added, execution_time_formatted):
     # Nom du fichier de configuration
     config_file_name = 'Config.cfg'
 
@@ -768,10 +667,6 @@ def Telegram_Notification(total_films_added, total_series_added, total_tv_added,
                     "```markdown\n"  # Début du bloc de code
                     "📝 Résumé du traitement\n"
                     "===========================\n\n"
-
-                    f"📽️ Films ajoutés :    {total_films_added}\n\n"
-
-                    f"📺 Séries ajoutées :   {total_series_added}\n\n"
 
                     f"📡 Chaînes TV ajoutées : {total_tv_added}\n\n"
 
@@ -855,9 +750,9 @@ if __name__ == "__main__":
 
     # Si unwanted_group est défini, lancer folder_generator
     if unwanted_group:
-        total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted = folder_generator()
+        total_tv_added, total_others_added, execution_time_formatted = folder_generator()
 
     if folder_generator:
-        Telegram_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
+        Telegram_Notification(total_tv_added, total_others_added, execution_time_formatted)
 
     print("*** End of Script.")
