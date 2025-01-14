@@ -5,17 +5,23 @@ import requests
 import logging
 import re
 import configparser
-import time  
+import time
 from datetime import datetime
+from telegram import Bot
+from telegram.error import TelegramError
 
 ######################################################################################################################
-                                    # DEBOGAGE # 
+                                    # DEBOGAGE #
 ######################################################################################################################
 
 # Fonction pour écrire dans le fichier error.txt
 def log_error(message):
-    logging.error(message)
-    
+    current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    error_message = f"[{current_time}] {message}"
+    logging.error(error_message)
+    with open("error.txt", "a", encoding='utf-8') as error_file:
+        error_file.write(error_message + "\n")
+
 ######################################################################################################################
                                     # Fonction Main
 ######################################################################################################################
@@ -84,7 +90,7 @@ def main():
     unwanted_groups_path = "unwantedgroup.cfg"
 
 ######################################################################################################################
-                                    # CREATION DU FICHIER CONFIG # 
+                                    # CREATION DU FICHIER CONFIG #
 ######################################################################################################################
 
 def create_default_config(config_path):
@@ -103,12 +109,13 @@ def create_default_config(config_path):
         <add key="SeriesSubDir" value="SERIE" />
         <add key="TVSubDir" value="TV" />
 
-		<!-- Suppression des préfixes-->
-		<add key="PrefixDel" value="FR - ,UK - ,DE - ,ES - " />
-		
-		<!-- Discord Bot-->
-		<add key="DiscordBotEnabled" value="False" />
-		<add key="DiscordBot" value="example.com" />
+        <!-- Suppression des préfixes-->
+        <add key="PrefixDel" value="FR - ,UK - ,DE - ,ES - " />
+
+        <!-- Telegram Bot-->
+        <add key="TelegramBotEnabled" value="False" />
+        <add key="TelegramBotToken" value="YOUR_TELEGRAM_BOT_TOKEN" />
+        <add key="TelegramChatID" value="YOUR_TELEGRAM_CHAT_ID" />
 
         <!-- Téléchargement du fichier m3u -->
         <add key="DownloadM3U8Enabled" value="False" />
@@ -124,11 +131,11 @@ def create_default_config(config_path):
         if os.path.exists(config_path):
             # Chemin pour le fichier Config.old
             old_config_path = config_path.replace("Config.cfg", "Config.old")
-            
+
             # Si Config.old existe déjà, le supprimer
             if os.path.exists(old_config_path):
                 os.remove(old_config_path)  # Supprimer l'ancien Config.old s'il existe déjà
-            
+
             # Renommer Config.cfg en Config.old
             os.rename(config_path, old_config_path)  # Renommer Config.cfg en Config.old
 
@@ -140,7 +147,7 @@ def create_default_config(config_path):
         print(f"*** Erreur lors de la création du fichier de configuration : {str(e)}")
 
 ######################################################################################################################
-                                   # CHARGEMENT DU FICHIER CONFIG 
+                                   # CHARGEMENT DU FICHIER CONFIG
 ######################################################################################################################
 
 def load_config(config_file):
@@ -170,7 +177,10 @@ def load_config(config_file):
             "UserName": config.get("UserName"),
             "UserPass": config.get("UserPass"),
             "m3u8File": config.get("m3u8File"),
-            "DownloadM3U8Enabled": config.get("DownloadM3U8Enabled") == "True"
+            "DownloadM3U8Enabled": config.get("DownloadM3U8Enabled") == "True",
+            "TelegramBotEnabled": config.get("TelegramBotEnabled") == "True",
+            "TelegramBotToken": config.get("TelegramBotToken"),
+            "TelegramChatID": config.get("TelegramChatID")
         }
     except ET.ParseError as e:
         log_error(f"*** Erreur lors du parsing du fichier de configuration : {e}")
@@ -294,13 +304,13 @@ def generate_unwanted_group_file(config_file):
         with open("unwantedgroup.cfg", "w", encoding='utf-8') as f:
             f.write("######################################################################################################################\n")
             f.write("DELETE ONLY GROUP YOU WANT TO BE DOWNLOADED AND TRAITED\n")  # Écrire le titre NOGROUP en premier
-            f.write(".NOGROUP-ASSIGNED | The first group assigned, it means they dont have (groupe-title"") completed \n")  # Écrire le titre NOGROUP en premier
+            f.write(".NOGROUP-ASSIGNED | The first group assigned, it means they dont have (groupe-title") completed \n")  # Écrire le titre NOGROUP en premier
             f.write("######################################################################################################################\n")
-            
+
             # Ajouter .NOGROUP-ASSIGNED si des groupes vides ont été trouvés
             if empty_group_found:
                 f.write(".NOGROUP-ASSIGNED\n")
-            
+
             for group in sorted_groups:
                 f.write(group + "\n")
 
@@ -314,30 +324,22 @@ def generate_unwanted_group_file(config_file):
         print("*** Aucun fichier M3U8 trouvé dans la configuration.")
 
 ######################################################################################################################
-                                   #Parametres Fonction FOLDER GENERATOR
+                                   #Paramètres Fonction FOLDER GENERATOR
 ######################################################################################################################
-def log_error(message):
-    if not os.path.exists("error.txt"):
-        with open("error.txt", "w", encoding='utf-8') as error_file:
-            error_file.write("Fichier d'erreurs créé\n")
-
-    with open("error.txt", "a", encoding='utf-8') as error_file:
-        error_file.write(message + "\n")
-
 def log_results(new_films, new_series, new_tv, new_others):
     log_directory = "log"
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
-    now = datetime.now().strftime("%H-%M-%d-%Y")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     film_log_file_path = os.path.join(log_directory, f"NewFilms-{now}.txt")
     series_log_file_path = os.path.join(log_directory, f"NewSeries-{now}.txt")
     tv_log_file_path = os.path.join(log_directory, f"NewTV-{now}.txt")
-    others_log_file_path = os.path.join(log_directory, f"NewTV-{now}.txt")
+    others_log_file_path = os.path.join(log_directory, f"NewOthers-{now}.txt")
 
     if new_films:
         with open(film_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {datetime.now()}\n")
+            log_file.write(f"Log pour {now}\n")
             for group_title, films in new_films.items():
                 log_file.write(f"--------------------\n{group_title}\n")
                 log_file.write("\n".join(films) + "\n")
@@ -345,7 +347,7 @@ def log_results(new_films, new_series, new_tv, new_others):
 
     if new_series:
         with open(series_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {datetime.now()}\n")
+            log_file.write(f"Log pour {now}\n")
             for group_title, series in new_series.items():
                 log_file.write(f"--------------------\n{group_title}\n")
                 log_file.write("\n".join(series) + "\n")
@@ -353,29 +355,30 @@ def log_results(new_films, new_series, new_tv, new_others):
 
     if new_tv:
         with open(tv_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {datetime.now()}\n")
+            log_file.write(f"Log pour {now}\n")
             for group_title, tvs in new_tv.items():
                 log_file.write(f"--------------------\n{group_title}\n")
                 log_file.write("\n".join(tvs) + "\n")
             log_file.write("---------------------------------------------------\n")
+
     if new_others:
         with open(others_log_file_path, 'a', encoding='utf-8') as log_file:
-            log_file.write(f"Log pour {datetime.now()}\n")
+            log_file.write(f"Log pour {now}\n")
             for group_title, tvs in new_others.items():
                 log_file.write(f"--------------------\n{group_title}\n")
                 log_file.write("\n".join(tvs) + "\n")
             log_file.write("---------------------------------------------------\n")
-          
+
 def log_global_script_status(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time):
     log_directory = "log"
     if not os.path.exists(log_directory):
         os.makedirs(log_directory)
 
-    now = datetime.now().strftime("%H-%M-%d-%Y")
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     global_log_file_path = os.path.join(log_directory, f"ScriptSuccess-{now}.txt")
 
     with open(global_log_file_path, 'a', encoding='utf-8') as log_file:
-        log_file.write(f"Traitement Terminé le {datetime.now()}\n")
+        log_file.write(f"Traitement Terminé le {now}\n")
         log_file.write(f"Total Films ajoutés : {total_films_added}\n")
         log_file.write(f"Total Séries ajoutées : {total_series_added}\n")
         log_file.write(f"Total Chaînes TV ajoutées : {total_tv_added}\n")
@@ -393,15 +396,14 @@ def extract_group_title(line):
     match = re.search(r'group-title="(.*?)"', line)
     return match.group(1) if match else "Unknown"
 
-
 def get_prefixes_from_config(file_path):
     # Lire le fichier Config.cfg
     tree = ET.parse(file_path)
     root = tree.getroot()
-    
+
     # Chercher la ligne avec la clé "PrefixDel"
     prefix_del = root.find(".//add[@key='PrefixDel']")
-    
+
     if prefix_del is not None:
         # Récupérer la valeur et la diviser en une liste de préfixes
         prefixes = prefix_del.get('value', '').split(',')
@@ -412,14 +414,14 @@ prefixes_displayed = False
 
 def prefixes_to_remove():
     global prefixes_displayed  # Indique que nous utilisons la variable globale
-    
+
     # Nom du fichier de configuration
     config_file_name = 'Config.cfg'
-    
+
     # Construire le chemin du fichier dans le répertoire actuel
     config_file_path = os.path.join(os.getcwd(), config_file_name)
 
-    # Vérifiez si le fichier de configuration existe
+    # Vérifier si le fichier de configuration existe
     if not os.path.exists(config_file_path):
         print(f"*** Le fichier de configuration '{config_file_name}' est manquant.")
         print("*** Faire cette commande '/C' pour le générer.")
@@ -427,11 +429,11 @@ def prefixes_to_remove():
 
     # Récupérer les préfixes
     prefixes_to_remove = get_prefixes_from_config('Config.cfg')
-    
+
     # Affichage unique des préfixes
-    if not prefixes_displayed:  # Vérifiez si le message a déjà été affiché
+    if not prefixes_displayed:  # Vérifier si le message a déjà été affiché
         print("*** Prefixes to remove:", prefixes_to_remove)
-        prefixes_displayed = True  # Marquez le message comme affiché
+        prefixes_displayed = True  # Marquer le message comme affiché
 
     # Retourner les préfixes
     return prefixes_to_remove
@@ -442,7 +444,7 @@ def clean_directory_name(name):
     # Supprimer les préfixes spécifiés
     for prefix in prefixes:
         name = name.replace(prefix, '')  # Remplacer le préfixe par une chaîne vide
-    
+
     # Nettoyer les caractères non valides sauf les crochets []
     name = re.sub(r'[<>:"/\\|?*...]', '', name)  # Retirer [ et ] de la liste
     name = re.sub(r'\s+', ' ', name).strip()
@@ -464,7 +466,7 @@ def clean_file_name(name):
 
     # Remplacer "4K" ou "4k" par "UHD"
     name = name.replace('4K', 'UHD').replace('4k', 'UHD')
-    
+
     return re.sub(r'\s+', ' ', name).strip()
 
 def extract_tvg_name(line):
@@ -483,13 +485,13 @@ def read_unwanted_group(unwanted_file_path):
     """Lit le fichier unwantedgroup.cfg et renvoie une liste de group-title indésirables."""
     if not os.path.exists(unwanted_file_path):
         return  # Retourne une liste vide si le fichier n'existe pas
-    
+
     with open(unwanted_file_path, 'r', encoding='utf-8') as file:
         unwanted_groups = {line.strip() for line in file if line.strip()}  # Utilisation d'un set pour éviter les doublons
-    
+
     if not unwanted_groups:
         log_error("Aucun groupe indésirable trouvé dans le fichier.")  # Enregistrer une information si le fichier est vide
-    
+
     return unwanted_groups
 
 def process_tv(line, output_directory, link, config_path):
@@ -506,7 +508,7 @@ def process_tv(line, output_directory, link, config_path):
     file_name = f"{clean_file_name(tvg_name)}.strm"
     full_file_path = os.path.join(tv_directory, file_name)
 
-    # Vérifiez si le fichier existe déjà
+    # Vérifier si le fichier existe déjà
     if not os.path.exists(full_file_path):
         with open(full_file_path, 'w', encoding='utf-8') as tv_file:
             tv_file.write(link)
@@ -527,7 +529,7 @@ def process_film(line, output_directory, link, config_path):
     file_name = f"{clean_file_name(film_name)}.strm"
     full_file_path = os.path.join(film_directory, file_name)
 
-    # Vérifiez si le fichier existe déjà
+    # Vérifier si le fichier existe déjà
     if not os.path.exists(full_file_path):
         with open(full_file_path, 'w', encoding='utf-8') as film_file:
             film_file.write(link)
@@ -535,8 +537,8 @@ def process_film(line, output_directory, link, config_path):
     return 0, clean_file_name(film_name)
 
 def process_series(line, output_directory, link, config_path):
-    group_title = extract_group_title(line)  
-    tvg_name = extract_tvg_name(line)  
+    group_title = extract_group_title(line)
+    tvg_name = extract_tvg_name(line)
 
     films_dir, series_dir, tv_dir = get_directory_names(config_path)
 
@@ -556,7 +558,7 @@ def process_series(line, output_directory, link, config_path):
     file_name = f"{clean_file_name(tvg_name)}.strm"
     full_file_path = os.path.join(series_sub_dir, file_name)
 
-    # Vérifiez si le fichier existe déjà
+    # Vérifier si le fichier existe déjà
     if not os.path.exists(full_file_path):
         with open(full_file_path, 'w', encoding='utf-8') as series_file:
             series_file.write(link)
@@ -609,7 +611,7 @@ def process_others(line, output_directory, link, config_path):
     try:
         with open(full_file_path, 'w', encoding='utf-8') as series_file:
             series_file.write(link)
-        
+
         # Vérifier si le dossier OTHERS doit être créé
         if not os.path.exists(others_directory):
             os.makedirs(others_directory)
@@ -619,6 +621,7 @@ def process_others(line, output_directory, link, config_path):
     except Exception as e:
         log_error(f"Erreur lors de l'écriture du fichier: {str(e)}")
         return 0, clean_file_name(tvg_name)  # Renvoie 0 et le nom de la chaîne en cas d'erreur
+
 ######################################################################################################################
                                    #Fonction FOLDER GENERATOR
 ######################################################################################################################
@@ -643,7 +646,7 @@ def folder_generator():
         new_others, existing_others, skipped_others = {}, {}, {}
 
         m3u8_file = root.find(".//add[@key='m3u8File']").get('value')
-        
+
         m3u8_file = root.find(".//add[@key='m3u8File']").get('value')
         with open(m3u8_file, 'r', encoding='utf-8') as m3u8:
             for line in m3u8:
@@ -686,7 +689,7 @@ def folder_generator():
                         if group_title not in new_others:
                             new_others[group_title] = []
                         new_others[group_title].append(result[1])
-                        
+
         # Logging des résultats
         log_results(new_films, new_series, new_tv, new_others)
 
@@ -717,19 +720,19 @@ def folder_generator():
 
     except Exception as e:
         log_error(f"Erreur lors de la génération des dossiers: {str(e)}")
-   
-######################################################################################################################
-                                   #Discord Notification
-######################################################################################################################      
 
-def Discord_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted):
+######################################################################################################################
+                                   #Telegram Notification
+######################################################################################################################
+
+def Telegram_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted):
     # Nom du fichier de configuration
     config_file_name = 'Config.cfg'
-    
+
     # Construire le chemin du fichier dans le répertoire actuel
     config_file_path = os.path.join(os.getcwd(), config_file_name)
 
-    # Vérifiez si le fichier de configuration existe
+    # Vérifier si le fichier de configuration existe
     if not os.path.exists(config_file_path):
         print(f"*** Le fichier de configuration '{config_file_name}' est manquant.")
         print("*** Faire cette commande '/C' pour le générer.")
@@ -739,62 +742,64 @@ def Discord_Notification(total_films_added, total_series_added, total_tv_added, 
     tree = ET.parse(config_file_path)
     root = tree.getroot()
 
-    # Chercher la clé "DiscordBotEnabled"
-    discordbot_enabled = root.find(".//add[@key='DiscordBotEnabled']")
-    if discordbot_enabled is None:
-        print("*** Clé 'DiscordBotEnabled' est vide ou introuvable dans la configuration.")
+    # Chercher la clé "TelegramBotEnabled"
+    telegrambot_enabled = root.find(".//add[@key='TelegramBotEnabled']")
+    if telegrambot_enabled is None:
+        print("*** Clé 'TelegramBotEnabled' est vide ou introuvable dans la configuration.")
         return  # Retourne si la clé n'existe pas
 
-    # Vérifiez si la valeur est "True" ou "False"
-    if discordbot_enabled.get('value', 'False') == 'True':
-        # Notifications Discord sont activées
-        print("*** Notifications Discord sont activées.")
+    # Vérifier si la valeur est "True" ou "False"
+    if telegrambot_enabled.get('value', 'False') == 'True':
+        # Notifications Telegram sont activées
+        print("*** Notifications Telegram sont activées.")
 
-        # Chercher la clé "DiscordBot" pour obtenir le webhook
-        DiscordBot = root.find(".//add[@key='DiscordBot']")
-        if DiscordBot is not None and DiscordBot.get('value'):
-            webhook_url = DiscordBot.get('value')
-            
-            # Construire le message avec les résultats de la fonction folder_generator
-            message = (
-                "```markdown\n"  # Début du bloc de code
-                "📝 Résumé du traitement\n"
-                "===========================\n\n"
+        # Chercher la clé "TelegramBotToken" pour obtenir le token
+        TelegramBotToken = root.find(".//add[@key='TelegramBotToken']")
+        if TelegramBotToken is not None and TelegramBotToken.get('value'):
+            bot_token = TelegramBotToken.get('value')
 
-                f"📽️ Films ajoutés :    {total_films_added}\n\n"
-                
-                f"📺 Séries ajoutées :   {total_series_added}\n\n"
-                
-                f"📡 Chaînes TV ajoutées : {total_tv_added}\n\n"
-                
-                f"📁 Autres ajoutés :     {total_others_added}\n\n"
-                
-                f"⏱️ Temps d'exécution :   {execution_time_formatted}\n\n"
-                
-                "===========================\n"
-                "✅ Fin du résumé\n"
-                "```"  # Fin du bloc de code
-            )
-            
-            payload = {
-                "content": message
-            }
-            try:
-                response = requests.post(webhook_url, json=payload)
-                if response.status_code == 204:
-                    print("*** Message envoyé avec succès à Discord.")
-                else:
-                    print(f"*** Échec de l'envoi du message. Code d'erreur : {response.status_code}")
-            except Exception as e:
-                print(f"*** Une erreur s'est produite lors de l'envoi du message : {e}")
+            # Chercher la clé "TelegramChatID" pour obtenir l'ID de chat
+            TelegramChatID = root.find(".//add[@key='TelegramChatID']")
+            if TelegramChatID is not None and TelegramChatID.get('value'):
+                chat_id = TelegramChatID.get('value')
+
+                # Construire le message avec les résultats de la fonction folder_generator
+                message = (
+                    "```markdown\n"  # Début du bloc de code
+                    "📝 Résumé du traitement\n"
+                    "===========================\n\n"
+
+                    f"📽️ Films ajoutés :    {total_films_added}\n\n"
+
+                    f"📺 Séries ajoutées :   {total_series_added}\n\n"
+
+                    f"📡 Chaînes TV ajoutées : {total_tv_added}\n\n"
+
+                    f"📁 Autres ajoutés :     {total_others_added}\n\n"
+
+                    f"⏱️ Temps d'exécution :   {execution_time_formatted}\n\n"
+
+                    "===========================\n"
+                    "✅ Fin du résumé\n"
+                    "```"  # Fin du bloc de code
+                )
+
+                bot = Bot(token=bot_token)
+                try:
+                    bot.send_message(chat_id=chat_id, text=message, parse_mode='Markdown')
+                    print("*** Message envoyé avec succès à Telegram.")
+                except TelegramError as e:
+                    print(f"*** Échec de l'envoi du message. Code d'erreur : {e}")
+            else:
+                print("*** Le lien 'TelegramChatID' est vide ou incorrect.")
         else:
-            print("*** Le lien 'DiscordBot' est vide ou incorrect.")
+            print("*** Le lien 'TelegramBotToken' est vide ou incorrect.")
     else:
-        print("*** Notifications Discord sont désactivées.")
-   
+        print("*** Notifications Telegram sont désactivées.")
+
 ######################################################################################################################
                                    #Derouler du script Logic
-######################################################################################################################      
+######################################################################################################################
 
 if __name__ == "__main__":
     # Chemin des fichiers de configuration
@@ -851,8 +856,8 @@ if __name__ == "__main__":
     # Si unwanted_group est défini, lancer folder_generator
     if unwanted_group:
         total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted = folder_generator()
-    
+
     if folder_generator:
-        Discord_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
-      
+        Telegram_Notification(total_films_added, total_series_added, total_tv_added, total_others_added, execution_time_formatted)
+
     print("*** End of Script.")
